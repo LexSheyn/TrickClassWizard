@@ -28,20 +28,28 @@ private slots:
 private:
 
     QLabel*                      ClassNameLabel;
-    QLabel*                      BaseClassLabel;
     QLineEdit*                   ClassNameLineEdit;
-    QLineEdit*                   BaseClassLineEdit;
-    QRegularExpressionValidator* Validator;
+    QLabel*                      BaseClassNameLabel;
+    QLineEdit*                   BaseClassNameLineEdit;
+    QRegularExpressionValidator* ClassValidator;
+    QGridLayout*                 ClassLayout;
+    QGroupBox*                   ClassGroup;
+
     QCheckBox*                   HeaderOnlyCheckBox;
+    QVBoxLayout*                 HeaderOnlyLayout;
+    QGroupBox*                   HeaderOnlyGroup;
+
     QCheckBox*                   NoCopyCheckBox;
-    QCheckBox*                   NoMoveCheckBox;
     QCheckBox*                   DefaultCopyCheckBox;
-    QCheckBox*                   DefaultMoveCheckBox;
-    QGroupBox*                   CopyGroupBox;
-    QGroupBox*                   MoveGroupBox;
     QVBoxLayout*                 CopyLayout;
+    QGroupBox*                   CopyGroupBox;
+
+    QCheckBox*                   NoMoveCheckBox;
+    QCheckBox*                   DefaultMoveCheckBox;
     QVBoxLayout*                 MoveLayout;
-    QGridLayout*                 Layout;
+    QGroupBox*                   MoveGroupBox;
+
+    QVBoxLayout*                 Layout;
 };
 
 #endif // FCLASSINFOPAGE_H

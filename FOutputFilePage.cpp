@@ -4,101 +4,142 @@ FOutputFilePage::FOutputFilePage(QWidget* Parent)
     : QWizardPage (Parent)
 {
     setTitle(tr("Output files"));
-    setSubTitle(tr("Specify file names and directories."));
-    //setPixmap(QWizard::LogoPixmap, QPixmap(":/images/logo3.png"));
+    setSubTitle(tr("\nSpecify file names and directories."));
 
     // Directories:
 
-    ProjectDirectoryLineEdit = new QLineEdit();
+    ProjectPathLineEdit = new QLineEdit();
 
-    connect(ProjectDirectoryLineEdit, &QLineEdit::textEdited, this, &FOutputFilePage::SetProjectDirectoryString);
+    connect(ProjectPathLineEdit, &QLineEdit::textEdited, this, &FOutputFilePage::SetProjectPathString);
 
-    ProjectDirectoryLabel = new QLabel(tr("Project directory:"));
-    ProjectDirectoryLabel->setBuddy(ProjectDirectoryLineEdit);
+    ProjectPathLabel = new QLabel(tr("Path:"));
+    ProjectPathLabel->setBuddy(ProjectPathLineEdit);
 
-    ProjectDirectoryPushButton = new QPushButton(tr("Browse..."), this);
-    ProjectDirectoryPushButton->setDefault(false);
+    ProjectPathPushButton = new QPushButton(tr("Browse..."), this);
+    ProjectPathPushButton->setDefault(false);
 
-    connect(ProjectDirectoryPushButton, &QPushButton::clicked, this, &FOutputFilePage::BrowseProject);
+    connect(ProjectPathPushButton, &QPushButton::clicked, this, &FOutputFilePage::BrowseProject);
 
-    NestedDirectoryLineEdit = new QLineEdit();
+    NestedPathLineEdit = new QLineEdit();
 
-    connect(NestedDirectoryLineEdit, &QLineEdit::textEdited, this, &FOutputFilePage::SetNestedDirectoryString);
+    connect(NestedPathLineEdit, &QLineEdit::textEdited, this, &FOutputFilePage::SetNestedPathString);
 
-    NestedDirectoryLabel = new QLabel(tr("Nested directory"));
-    NestedDirectoryLabel->setBuddy(NestedDirectoryLineEdit);
+    NestedPathLabel = new QLabel(tr("Nested path:"));
+    NestedPathLabel->setBuddy(NestedPathLineEdit);
 
     ProjectLayout = new QGridLayout();
-    ProjectLayout->addWidget(ProjectDirectoryLabel     , 0, 0);
-    ProjectLayout->addWidget(ProjectDirectoryLineEdit  , 0, 1);
-    ProjectLayout->addWidget(ProjectDirectoryPushButton, 0, 2);
-    ProjectLayout->addWidget(NestedDirectoryLabel      , 1, 0);
-    ProjectLayout->addWidget(NestedDirectoryLineEdit   , 1, 1);
+    ProjectLayout->addWidget(ProjectPathLabel     , 0, 0);
+    ProjectLayout->addWidget(ProjectPathLineEdit  , 0, 1);
+    ProjectLayout->addWidget(ProjectPathPushButton, 0, 2);
+    ProjectLayout->addWidget(NestedPathLabel      , 1, 0);
+    ProjectLayout->addWidget(NestedPathLineEdit   , 1, 1);
 
     ProjectGroupBox = new QGroupBox(tr("Project"));
     ProjectGroupBox->setLayout(ProjectLayout);
 
+    // PCH:
+
+    PCHCheckBox = new QCheckBox(tr("Precompiled headers"));
+
+    b_PCH = true;
+
+    PCHSubpathLineEdit = new QLineEdit();
+
+    PCHSubpathLabel = new QLabel(tr("Subpath:"));
+    PCHSubpathLabel->setBuddy(PCHSubpathLineEdit);
+
+    PCHSubpathString = "PCH";
+
+    PCHNameLineEdit = new QLineEdit();
+
+    PCHNameLabel = new QLabel(tr("Name:"));
+    PCHNameLabel->setBuddy(PCHNameLineEdit);
+
+    PCHNameString = "t3dpch.h";
+
+    connect(PCHCheckBox, &QCheckBox::toggled, PCHSubpathLineEdit, &QLineEdit::setEnabled );
+    connect(PCHCheckBox, &QCheckBox::toggled, PCHSubpathLabel   , &QLabel::setEnabled);
+    connect(PCHSubpathLineEdit, &QLineEdit::textEdited, this, &FOutputFilePage::SetPCHSubpathString);
+
+    connect(PCHCheckBox, &QCheckBox::toggled, PCHNameLineEdit   , &QLineEdit::setEnabled);
+    connect(PCHCheckBox, &QCheckBox::toggled, PCHNameLabel      , &QLabel::setEnabled);
+    connect(PCHNameLineEdit, &QLineEdit::textEdited, this, &FOutputFilePage::SetPCHNameString);
+
+    PCHLayout = new QGridLayout();
+    PCHLayout->addWidget(PCHSubpathLabel   , 0, 0);
+    PCHLayout->addWidget(PCHSubpathLineEdit, 0, 1);
+    PCHLayout->addWidget(PCHNameLabel      , 1, 0);
+    PCHLayout->addWidget(PCHNameLineEdit   , 1, 1);
+
+    PCHGroup = new QGroupBox();
+    PCHGroup->setLayout(PCHLayout);
+
     // Header:
 
-    HeaderSubdirectoryLineEdit = new QLineEdit();
+    HeaderSubpathLineEdit = new QLineEdit();
 
-    connect(HeaderSubdirectoryLineEdit, &QLineEdit::textEdited, this, &FOutputFilePage::SetHeaderSubdirectoryString);
+    connect(HeaderSubpathLineEdit, &QLineEdit::textEdited, this, &FOutputFilePage::SetHeaderSubpathString);
 
-    HeaderSubdirectoryString = "include";
+    HeaderSubpathString = "include";
 
-    HeaderSubdirectoryLabel = new QLabel(tr("Header subdirectory:"));
-    HeaderSubdirectoryLabel->setBuddy(HeaderSubdirectoryLineEdit);
+    HeaderSubpathLabel = new QLabel(tr("Subpath:"));
+    HeaderSubpathLabel->setBuddy(HeaderSubpathLineEdit);
 
-    HeaderLineEdit = new QLineEdit();
+    HeaderNameLineEdit = new QLineEdit();
 
-    HeaderLabel = new QLabel(tr("Header name:"));
-    HeaderLabel->setBuddy(HeaderLineEdit);
+    HeaderNameLabel = new QLabel(tr("Name:"));
+    HeaderNameLabel->setBuddy(HeaderNameLineEdit);
 
     HeaderLayout = new QGridLayout();
-    HeaderLayout->addWidget(HeaderSubdirectoryLabel   , 0, 0);
-    HeaderLayout->addWidget(HeaderSubdirectoryLineEdit, 0, 1);
-    HeaderLayout->addWidget(HeaderLabel               , 1, 0);
-    HeaderLayout->addWidget(HeaderLineEdit            , 1, 1);
+    HeaderLayout->addWidget(HeaderSubpathLabel   , 0, 0);
+    HeaderLayout->addWidget(HeaderSubpathLineEdit, 0, 1);
+    HeaderLayout->addWidget(HeaderNameLabel      , 1, 0);
+    HeaderLayout->addWidget(HeaderNameLineEdit   , 1, 1);
 
     HeaderGroupBox = new QGroupBox(tr("Header"));
     HeaderGroupBox->setLayout(HeaderLayout);
 
     // Source:
 
-    SourceSubdirectoryLineEdit = new QLineEdit();
+    SourceSubpathLineEdit = new QLineEdit();
 
-    connect(SourceSubdirectoryLineEdit, &QLineEdit::textEdited, this, &FOutputFilePage::SetSourceSubdirectoryString);
+    connect(SourceSubpathLineEdit, &QLineEdit::textEdited, this, &FOutputFilePage::SetSourceSubpathString);
 
-    SourceSubdirectoryString = "src";
+    SourceSubpathString = "src";
 
-    SourceSubdirectoryLabel = new QLabel(tr("Source subdirectory:"));
-    SourceSubdirectoryLabel->setBuddy(SourceSubdirectoryLineEdit);
+    SourceSubpathLabel = new QLabel(tr("Subpath:"));
+    SourceSubpathLabel->setBuddy(SourceSubpathLineEdit);
 
-    SourceLineEdit = new QLineEdit();
+    SourceNameLineEdit = new QLineEdit();
 
-    SourceLabel = new QLabel(tr("Source name:"));
-    SourceLabel->setBuddy(SourceLineEdit);
+    SourceNameLabel = new QLabel(tr("Name:"));
+    SourceNameLabel->setBuddy(SourceNameLineEdit);
 
     SourceLayout = new QGridLayout();
-    SourceLayout->addWidget(SourceSubdirectoryLabel   , 0, 0);
-    SourceLayout->addWidget(SourceSubdirectoryLineEdit, 0, 1);
-    SourceLayout->addWidget(SourceLabel               , 1, 0);
-    SourceLayout->addWidget(SourceLineEdit            , 1, 1);
+    SourceLayout->addWidget(SourceSubpathLabel   , 0, 0);
+    SourceLayout->addWidget(SourceSubpathLineEdit, 0, 1);
+    SourceLayout->addWidget(SourceNameLabel      , 1, 0);
+    SourceLayout->addWidget(SourceNameLineEdit   , 1, 1);
 
     SourceGroupBox = new QGroupBox(tr("Source"));
     SourceGroupBox->setLayout(SourceLayout);
 
     // Page composing:
 
-    registerField("ProjectDirectory"  , ProjectDirectoryLineEdit);
-    registerField("NestedDirectory"   , NestedDirectoryLineEdit);
-    registerField("HeaderSubdirectory", HeaderSubdirectoryLineEdit);
-    registerField("HeaderName"        , HeaderLineEdit);
-    registerField("SourceSubdirectory", SourceSubdirectoryLineEdit);
-    registerField("SourceName"        , SourceLineEdit);
+    registerField("ProjectPath"  , ProjectPathLineEdit);
+    registerField("NestedPath"   , NestedPathLineEdit);
+    registerField("PCH"          , PCHCheckBox);
+    registerField("PCHSubpath"   , PCHSubpathLineEdit);
+    registerField("PCHName"      , PCHNameLineEdit);
+    registerField("HeaderSubpath", HeaderSubpathLineEdit);
+    registerField("HeaderName"   , HeaderNameLineEdit);
+    registerField("SourceSubpath", SourceSubpathLineEdit);
+    registerField("SourceName"   , SourceNameLineEdit);
 
     Layout = new QVBoxLayout();
     Layout->addWidget(ProjectGroupBox);
+    Layout->addWidget(PCHCheckBox);
+    Layout->addWidget(PCHGroup);
     Layout->addWidget(HeaderGroupBox);
     Layout->addWidget(SourceGroupBox);
 
@@ -112,36 +153,43 @@ FOutputFilePage::~FOutputFilePage()
     t3d::FEvent::SettingsLoaded.Unsubscribe(&FOutputFilePage::OnSettingsLoaded);
 }
 
-QString FOutputFilePage::GetHeaderDirectory()
+QString FOutputFilePage::GetHeaderPath()
 {
-    return ProjectDirectoryLineEdit->text() + '/' + HeaderSubdirectoryLineEdit->text() + '/' + NestedDirectoryLineEdit->text() + '/';
+    return ProjectPathLineEdit->text() + '/' + HeaderSubpathLineEdit->text() + '/' + NestedPathLineEdit->text() + '/';
 }
 
-QString FOutputFilePage::GetSourceDirectory()
+QString FOutputFilePage::GetSourcePath()
 {
-    return ProjectDirectoryLineEdit->text() + '/' + SourceSubdirectoryLineEdit->text() + '/' + NestedDirectoryLineEdit->text() + '/';
+    return ProjectPathLineEdit->text() + '/' + SourceSubpathLineEdit->text() + '/' + NestedPathLineEdit->text() + '/';
 }
 
 void FOutputFilePage::initializePage()
 {
     // Directories:
 
-    ProjectDirectoryLineEdit->setText(ProjectDirectoryString);
-    NestedDirectoryLineEdit ->setText(NestedDirectoryString);
+    ProjectPathLineEdit->setText(ProjectPathString);
+    NestedPathLineEdit ->setText(NestedPathString);
+
+    // PCH:
+
+    PCHCheckBox->setChecked(b_PCH);
+
+    PCHSubpathLineEdit->setText(PCHSubpathString);
+    PCHNameLineEdit   ->setText(PCHNameString);
 
     // Header:
 
-    HeaderSubdirectoryLineEdit->setText(HeaderSubdirectoryString);
+    HeaderSubpathLineEdit->setText(HeaderSubpathString);
 
     QString ClassName = field("ClassName").toString();
 
-    HeaderLineEdit ->setText(ClassName + ".h");
+    HeaderNameLineEdit ->setText(ClassName + ".h");
 
     // Source:
 
-    SourceSubdirectoryLineEdit->setText(SourceSubdirectoryString);
+    SourceSubpathLineEdit->setText(SourceSubpathString);
 
-    SourceLineEdit->setText(ClassName + ".cpp");
+    SourceNameLineEdit->setText(ClassName + ".cpp");
 
     SourceGroupBox->setVisible(!field("HeaderOnly").toBool());
 }
@@ -150,49 +198,63 @@ void FOutputFilePage::BrowseProject()
 {
     QString Path;
 
-    if (ProjectDirectoryLineEdit->text().isEmpty())
+    if (ProjectPathLineEdit->text().isEmpty())
     {
         Path = QDir::rootPath();
     }
     else
     {
-        Path = ProjectDirectoryLineEdit->text();
+        Path = ProjectPathLineEdit->text();
     }
 
-    QString Directory = QFileDialog::getExistingDirectory(this, tr("Project directory"), Path);
+    QString Directory = QFileDialog::getExistingDirectory(this, tr("Project path"), Path);
 
     if (Directory.isEmpty() == false)
     {
-        ProjectDirectoryLineEdit->setText(Directory);
+        ProjectPathLineEdit->setText(Directory);
+        ProjectPathString = ProjectPathLineEdit->text();
     }
 }
 
-void FOutputFilePage::SetProjectDirectoryString(const QString& Text)
+void FOutputFilePage::SetProjectPathString(const QString& Text)
 {
-    ProjectDirectoryString = Text;
+    ProjectPathString = Text;
 }
 
-void FOutputFilePage::SetNestedDirectoryString(const QString& Text)
+void FOutputFilePage::SetNestedPathString(const QString& Text)
 {
-    NestedDirectoryString = Text;
+    NestedPathString = Text;
 }
 
-void FOutputFilePage::SetHeaderSubdirectoryString(const QString &Text)
+void FOutputFilePage::SetPCHSubpathString(const QString &Text)
 {
-    HeaderSubdirectoryString = Text;
+    PCHSubpathString = Text;
 }
 
-void FOutputFilePage::SetSourceSubdirectoryString(const QString &Text)
+void FOutputFilePage::SetPCHNameString(const QString &Text)
 {
-    SourceSubdirectoryString = Text;
+    PCHNameString = Text;
+}
+
+void FOutputFilePage::SetHeaderSubpathString(const QString &Text)
+{
+    HeaderSubpathString = Text;
+}
+
+void FOutputFilePage::SetSourceSubpathString(const QString &Text)
+{
+    SourceSubpathString = Text;
 }
 
 t3d::EPropagation FOutputFilePage::OnSettingsLoaded(FWizardSettings::Settings_T Settings)
 {
-    ProjectDirectoryString    = Settings.ProjectDirectory;
-    NestedDirectoryString     = Settings.NestedDirectory;
-    HeaderSubdirectoryString  = Settings.HeaderSubdirectory;
-    SourceSubdirectoryString  = Settings.SourceSubdirectory;
+    ProjectPathString    = Settings.ProjectPath;
+    NestedPathString     = Settings.NestedPath;
+    b_PCH                = Settings.b_PCH;
+    PCHSubpathString     = Settings.PCHSubpath;
+    PCHNameString        = Settings.PCHName;
+    HeaderSubpathString  = Settings.HeaderSubpath;
+    SourceSubpathString  = Settings.SourceSubpath;
 
     return t3d::EPropagation::Continue;
 }

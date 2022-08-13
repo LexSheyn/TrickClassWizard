@@ -1,6 +1,8 @@
 #ifndef FCLASSWIZARD_H
 #define FCLASSWIZARD_H
 
+#include <QApplication>
+#include <QStyleFactory>
 #include <QWizard>
 #include <QByteArray>
 #include <QDir>
@@ -18,12 +20,14 @@
 struct FClassData
 {
     QByteArray ClassName;
-    QByteArray BaseClass;
-    QString    ProjectDirectory;
-    QString    NestedDirectory;
+    QByteArray BaseClassName;
+    QString    ProjectPath;
+    QString    NestedPath;
+    QString    PCHSubpath;
+    QString    PCHName;
     QByteArray Namespace;
-    QString    HeaderFile;
-    QString    SourceFile;
+    QString    HeaderName;
+    QString    SourceName;
 };
 
 class FClassWizard : public QWizard

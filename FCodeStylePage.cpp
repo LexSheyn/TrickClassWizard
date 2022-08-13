@@ -4,8 +4,7 @@ FCodeStylePage::FCodeStylePage(QWidget* Parent)
     : QWizardPage (Parent)
 {
     setTitle(tr("Code style options"));
-    setSubTitle("Choose the formatting of the generated code.");
-    //setPixmap(QWizard::LogoPixmap, QPixmap(":/images/logo2.png"));
+    setSubTitle("\nChoose the formatting of the generated code.");
 
     // Namespace:
 
@@ -137,8 +136,8 @@ void FCodeStylePage::SetDefineGuardBool(t3d::bool8 Checked)
 t3d::EPropagation FCodeStylePage::OnSettingsLoaded(FWizardSettings::Settings_T Settings)
 {
     NamespaceString = Settings.Namespace;
-    b_PragmaGuard   = Settings.PragmaGuard;
-    b_DefineGuard   = Settings.DefineGuard;
+    b_PragmaGuard   = Settings.b_PragmaGuard;
+    b_DefineGuard   = Settings.b_DefineGuard;
 
     return t3d::EPropagation::Continue;
 }

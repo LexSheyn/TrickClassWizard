@@ -3,9 +3,11 @@
 FClassWizard::FClassWizard(QWidget* Parent)
     : QWizard (Parent)
 {
+    setStyleSheet("QWizard { background-color: #FFFFFF }");
+    setPixmap(QWizard::LogoPixmap, QPixmap(":Wizard_64_L.png"));
+
     setWindowTitle(tr("Trick class wizard"));
-    setPixmap(QWizard::BannerPixmap    , QPixmap(":/images/banner.png"));
-    setPixmap(QWizard::BackgroundPixmap, QPixmap(":/images/background.png"));
+    setWizardStyle(QWizard::ModernStyle);
 
     connect(button(FinishButton), &QAbstractButton::pressed, this, &FClassWizard::CreateClass);
 
@@ -17,6 +19,8 @@ FClassWizard::FClassWizard(QWidget* Parent)
     addPage(CodeStylePage);
     addPage(OutputFilePage);
 
+    setMinimumSize(500, 500); // PAGE SIZE HOT FIX
+
     LoadSettings();
 }
 
@@ -24,15 +28,17 @@ void FClassWizard::CreateClass()
 {
     FClassData ClassData{};
 
-    ClassData.ClassName        = field("ClassName")       .toByteArray();
-    ClassData.BaseClass        = field("BaseClass")       .toByteArray();
-    ClassData.ProjectDirectory = field("ProjectDirectory").toString();
-    ClassData.NestedDirectory  = field("NestedDirectory") .toString();
-    ClassData.Namespace        = field("Namespace")       .toByteArray();
-    ClassData.HeaderFile       = field("HeaderName")      .toString();
-    ClassData.SourceFile       = field("SourceName")      .toString();
+    ClassData.ClassName     = field("ClassName")    .toByteArray();
+    ClassData.BaseClassName = field("BaseClassName").toByteArray();
+    ClassData.ProjectPath   = field("ProjectPath")  .toString();
+    ClassData.NestedPath    = field("NestedPath")   .toString();
+    ClassData.PCHSubpath    = field("PCHSubpath")   .toString();
+    ClassData.PCHName       = field("PCHName")      .toString();
+    ClassData.Namespace     = field("Namespace")    .toByteArray();
+    ClassData.HeaderName    = field("HeaderName")   .toString();
+    ClassData.SourceName    = field("SourceName")   .toString();
 
-    if (ClassData.ProjectDirectory.isEmpty())
+    if (ClassData.ProjectPath.isEmpty())
     {
         FMessageBox::Warning(this, __FUNCTION__, "Need to specify project directory where files will be created!");
 
@@ -61,11 +67,11 @@ void FClassWizard::CreateHeader(FClassData& ClassData)
         Data += "\n\n";
     }
 
-    if (ClassData.BaseClass.isEmpty() == false)
+    if (ClassData.BaseClassName.isEmpty() == false)
     {
         QString BaseClassName = "#include ";
         BaseClassName += '"';
-        BaseClassName += ClassData.BaseClass;
+        BaseClassName += ClassData.BaseClassName;
         BaseClassName += ".h";
         BaseClassName += '"';
         BaseClassName += '\n';
@@ -79,9 +85,9 @@ void FClassWizard::CreateHeader(FClassData& ClassData)
     Data += '\t';
     Data += "class " + ClassData.ClassName;
 
-    if (ClassData.BaseClass.isEmpty() == false)
+    if (ClassData.BaseClassName.isEmpty() == false)
     {
-        Data += " : public " + ClassData.BaseClass;
+        Data += " : public " + ClassData.BaseClassName;
     }
 
     Data += '\n';
@@ -117,14 +123,14 @@ void FClassWizard::CreateHeader(FClassData& ClassData)
         Data += "#endif // " + FCodeStylePage::GetDefineGuardName(ClassData.ClassName);
     }
 
-    QDir HeaderDirectory(OutputFilePage->GetHeaderDirectory());
+    QDir HeaderDirectory(OutputFilePage->GetHeaderPath());
 
     if (HeaderDirectory.exists() == false)
     {
         HeaderDirectory.mkpath(".");
     }
 
-    QFile HeaderFile(OutputFilePage->GetHeaderDirectory() + field("HeaderName").toString());
+    QFile HeaderFile(OutputFilePage->GetHeaderPath() + field("HeaderName").toString());
 
     if (HeaderFile.open(QFile::WriteOnly | QFile::Text) == false)
     {
@@ -146,18 +152,34 @@ void FClassWizard::CreateSource(FClassData& ClassData)
 
     QByteArray Data;
 
-    QString IncludePCH = "#include ";
-    IncludePCH += '"';
-    IncludePCH += "PCH/t3dpch.h";
-    IncludePCH += '"';
+    if (field("PCH").toBool())
+    {
+        QString IncludePCH = "#include ";
+        IncludePCH += '"';
+
+        if (ClassData.PCHSubpath.isEmpty() == false)
+        {
+            IncludePCH += ClassData.PCHSubpath + '/';
+        }
+
+        IncludePCH += ClassData.PCHName;
+        IncludePCH += '"';
+
+        Data += IncludePCH.toLatin1() + '\n';
+    }
 
     QString IncludeClass = "#include ";
     IncludeClass += '"';
+
+    if (ClassData.NestedPath.isEmpty() == false)
+    {
+        IncludeClass += ClassData.NestedPath + '/';
+    }
+
     IncludeClass += ClassData.ClassName;
     IncludeClass += ".h";
     IncludeClass += '"';
 
-    Data += IncludePCH.toLatin1() + '\n';
     Data += IncludeClass.toLatin1() + '\n';
     Data += '\n';
 
@@ -165,14 +187,14 @@ void FClassWizard::CreateSource(FClassData& ClassData)
     Data += "{\n";
     Data += "} // " + FCodeStylePage::GetNamespace(ClassData.Namespace) + '\n';
 
-    QDir SourceDirectory(OutputFilePage->GetSourceDirectory());
+    QDir SourceDirectory(OutputFilePage->GetSourcePath());
 
     if (SourceDirectory.exists() == false)
     {
         SourceDirectory.mkpath(".");
     }
 
-    QFile SourceFile(OutputFilePage->GetSourceDirectory() + field("SourceName").toString());
+    QFile SourceFile(OutputFilePage->GetSourcePath() + field("SourceName").toString());
 
     if (SourceFile.open(QFile::WriteOnly | QFile::Text) == false)
     {
@@ -189,13 +211,16 @@ void FClassWizard::SaveSettings()
 {
     FWizardSettings::Settings_T Settings;
 
-    Settings.ProjectDirectory   = field("ProjectDirectory")  .toByteArray();
-    Settings.NestedDirectory    = field("NestedDirectory")   .toByteArray();
-    Settings.HeaderSubdirectory = field("HeaderSubdirectory").toByteArray();
-    Settings.SourceSubdirectory = field("SourceSubdirectory").toByteArray();
-    Settings.Namespace          = field("Namespace")         .toByteArray();
-    Settings.PragmaGuard        = field("PragmaGuard")       .toBool();
-    Settings.DefineGuard        = field("DefineGuard")       .toBool();
+    Settings.ProjectPath   = field("ProjectPath")  .toByteArray();
+    Settings.NestedPath    = field("NestedPath")   .toByteArray();
+    Settings.b_PCH         = field("PCH")          .toBool();
+    Settings.PCHSubpath    = field("PCHSubpath")   .toByteArray();
+    Settings.PCHName       = field("PCHName")      .toByteArray();
+    Settings.HeaderSubpath = field("HeaderSubpath").toByteArray();
+    Settings.SourceSubpath = field("SourceSubpath").toByteArray();
+    Settings.Namespace     = field("Namespace")    .toByteArray();
+    Settings.b_PragmaGuard = field("PragmaGuard")  .toBool();
+    Settings.b_DefineGuard = field("DefineGuard")  .toBool();
 
     if (FWizardSettings::Save(&Settings) == false)
     {

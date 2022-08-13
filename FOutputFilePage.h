@@ -6,7 +6,9 @@
 #include <QLineEdit>
 #include <QGroupBox>
 #include <QGridLayout>
+#include <QHBoxLayout>
 #include <QPushButton>
+#include <QCheckBox>
 #include <QFileDialog>
 #include <QDir>
 #include <QString>
@@ -22,8 +24,8 @@ public:
      FOutputFilePage (QWidget* Parent = nullptr);
     ~FOutputFilePage ();
 
-    QString GetHeaderDirectory ();
-    QString GetSourceDirectory ();
+    QString GetHeaderPath ();
+    QString GetSourcePath ();
 
 protected:
 
@@ -31,40 +33,56 @@ protected:
 
 private slots:
 
-    void BrowseProject               ();
-    void SetProjectDirectoryString   (const QString& Text);
-    void SetNestedDirectoryString    (const QString& Text);
-    void SetHeaderSubdirectoryString (const QString& Text);
-    void SetSourceSubdirectoryString (const QString& Text);
+    void BrowseProject          ();
+    void SetProjectPathString   (const QString& Text);
+    void SetNestedPathString    (const QString& Text);
+    void SetPCHSubpathString    (const QString& Text);
+    void SetPCHNameString       (const QString& Text);
+    void SetHeaderSubpathString (const QString& Text);
+    void SetSourceSubpathString (const QString& Text);
 
 private:
 
     t3d::EPropagation OnSettingsLoaded (FWizardSettings::Settings_T Settings);
 
-    QLabel*      ProjectDirectoryLabel;
-    QLabel*      NestedDirectoryLabel;
-    QLabel*      HeaderSubdirectoryLabel;
-    QLabel*      SourceSubdirectoryLabel;
-    QLabel*      HeaderLabel;
-    QLabel*      SourceLabel;
-    QLineEdit*   ProjectDirectoryLineEdit;
-    QLineEdit*   NestedDirectoryLineEdit;
-    QLineEdit*   HeaderSubdirectoryLineEdit;
-    QLineEdit*   SourceSubdirectoryLineEdit;
-    QLineEdit*   HeaderLineEdit;
-    QLineEdit*   SourceLineEdit;
-    QPushButton* ProjectDirectoryPushButton;
+    QLabel*      ProjectPathLabel;
+    QLineEdit*   ProjectPathLineEdit;
+    QPushButton* ProjectPathPushButton;
+    QString      ProjectPathString;
+    QLabel*      NestedPathLabel;
+    QLineEdit*   NestedPathLineEdit;
+    QString      NestedPathString;
     QGroupBox*   ProjectGroupBox;
-    QGroupBox*   HeaderGroupBox;
-    QGroupBox*   SourceGroupBox;
     QGridLayout* ProjectLayout;
+
+    QCheckBox*   PCHCheckBox;
+    bool         b_PCH;
+    QLineEdit*   PCHSubpathLineEdit;
+    QLabel*      PCHSubpathLabel;
+    QString      PCHSubpathString;
+    QLineEdit*   PCHNameLineEdit;
+    QLabel*      PCHNameLabel;
+    QString      PCHNameString;
+    QGridLayout* PCHLayout;
+    QGroupBox*   PCHGroup;
+
+    QLabel*      HeaderSubpathLabel;
+    QLineEdit*   HeaderSubpathLineEdit;
+    QString      HeaderSubpathString;
+    QLabel*      HeaderNameLabel;
+    QLineEdit*   HeaderNameLineEdit;
     QGridLayout* HeaderLayout;
+    QGroupBox*   HeaderGroupBox;
+
+    QLabel*      SourceSubpathLabel;
+    QLineEdit*   SourceSubpathLineEdit;
+    QString      SourceSubpathString;
+    QLabel*      SourceNameLabel;
+    QLineEdit*   SourceNameLineEdit;
     QGridLayout* SourceLayout;
+    QGroupBox*   SourceGroupBox;
+
     QVBoxLayout* Layout;
-    QString      ProjectDirectoryString;
-    QString      NestedDirectoryString;
-    QString      HeaderSubdirectoryString;
-    QString      SourceSubdirectoryString;
 };
 
 #endif // FOUTPUTFILEPAGE_H

@@ -4,24 +4,38 @@ FClassInfoPage::FClassInfoPage(QWidget* Parent)
     : QWizardPage (Parent)
 {
     setTitle(tr("Class information"));
-    setSubTitle(tr("Specify basic information about the class."));
-    //setPixmap(QWizard::LogoPixmap, QPixmap(":/images/logo1.png"));
+    setSubTitle(tr("\nSpecify basic information about the class."));
 
-    Validator = new QRegularExpressionValidator(QRegularExpression("\\w{1,}"), this);
+    ClassValidator = new QRegularExpressionValidator(QRegularExpression("\\w{1,}"), this);
 
     ClassNameLineEdit = new QLineEdit();
-    ClassNameLineEdit->setValidator(Validator);
+    ClassNameLineEdit->setValidator(ClassValidator);
 
-    ClassNameLabel = new QLabel(tr("Class name:"));
+    ClassNameLabel = new QLabel(tr("Name:"));
     ClassNameLabel->setBuddy(ClassNameLineEdit);
 
-    BaseClassLineEdit = new QLineEdit();
-    BaseClassLineEdit->setValidator(Validator);
+    BaseClassNameLineEdit = new QLineEdit();
+    BaseClassNameLineEdit->setValidator(ClassValidator);
 
-    BaseClassLabel = new QLabel(tr("Base class:"));
-    BaseClassLabel->setBuddy(BaseClassLineEdit);
+    BaseClassNameLabel = new QLabel(tr("Base class name:"));
+    BaseClassNameLabel->setBuddy(BaseClassNameLineEdit);
+
+    ClassLayout = new QGridLayout();
+    ClassLayout->addWidget(ClassNameLabel       , 0, 0);
+    ClassLayout->addWidget(ClassNameLineEdit    , 0, 1);
+    ClassLayout->addWidget(BaseClassNameLabel   , 1, 0);
+    ClassLayout->addWidget(BaseClassNameLineEdit, 1, 1);
+
+    ClassGroup = new QGroupBox("Class");
+    ClassGroup->setLayout(ClassLayout);
 
     HeaderOnlyCheckBox = new QCheckBox(tr("Header only"));
+
+    HeaderOnlyLayout = new QVBoxLayout();
+    HeaderOnlyLayout->addWidget(HeaderOnlyCheckBox);
+
+    HeaderOnlyGroup = new QGroupBox();
+    HeaderOnlyGroup->setLayout(HeaderOnlyLayout);
 
     NoCopyCheckBox      = new QCheckBox(tr("No"));
     DefaultCopyCheckBox = new QCheckBox(tr("Default"));
@@ -33,13 +47,13 @@ FClassInfoPage::FClassInfoPage(QWidget* Parent)
     connect(NoMoveCheckBox     , &QCheckBox::toggled, this, &FClassInfoPage::UncheckDefaultMove);
     connect(DefaultMoveCheckBox, &QCheckBox::toggled, this, &FClassInfoPage::UncheckNoMove);
 
-    registerField("ClassName*" , ClassNameLineEdit);
-    registerField("BaseClass"  , BaseClassLineEdit);
-    registerField("HeaderOnly" , HeaderOnlyCheckBox);
-    registerField("NoCopy"     , NoCopyCheckBox);
-    registerField("NoMove"     , NoMoveCheckBox);
-    registerField("DefaultCopy", DefaultCopyCheckBox);
-    registerField("DefaultMove", DefaultMoveCheckBox);
+    registerField("ClassName*"   , ClassNameLineEdit);
+    registerField("BaseClassName", BaseClassNameLineEdit);
+    registerField("HeaderOnly"   , HeaderOnlyCheckBox);
+    registerField("NoCopy"       , NoCopyCheckBox);
+    registerField("NoMove"       , NoMoveCheckBox);
+    registerField("DefaultCopy"  , DefaultCopyCheckBox);
+    registerField("DefaultMove"  , DefaultMoveCheckBox);
 
     CopyLayout = new QVBoxLayout();
     CopyLayout->addWidget(NoCopyCheckBox);
@@ -55,14 +69,11 @@ FClassInfoPage::FClassInfoPage(QWidget* Parent)
     MoveGroupBox = new QGroupBox(tr("Move constructor and assignment operator"));
     MoveGroupBox->setLayout(MoveLayout);
 
-    Layout = new QGridLayout();
-    Layout->addWidget(ClassNameLabel    , 0, 0);
-    Layout->addWidget(ClassNameLineEdit , 0, 1);
-    Layout->addWidget(BaseClassLabel    , 1, 0);
-    Layout->addWidget(BaseClassLineEdit , 1, 1);
-    Layout->addWidget(HeaderOnlyCheckBox, 2, 0, 1, 2);
-    Layout->addWidget(CopyGroupBox      , 3, 0, 1, 2);
-    Layout->addWidget(MoveGroupBox      , 4, 0, 1, 2);
+    Layout = new QVBoxLayout();
+    Layout->addWidget(ClassGroup);
+    Layout->addWidget(HeaderOnlyGroup);
+    Layout->addWidget(CopyGroupBox);
+    Layout->addWidget(MoveGroupBox);
 
     setLayout(Layout);
 }

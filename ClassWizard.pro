@@ -1,4 +1,4 @@
-QT       += core gui quickcontrols2
+QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -34,6 +34,8 @@ HEADERS += \
     TrickTypes.h
 
 RC_ICONS = Wizard_48_Green.ico
+
+RESOURCES = application.qrc
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

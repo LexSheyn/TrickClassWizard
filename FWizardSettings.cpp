@@ -1,37 +1,49 @@
 #include "FWizardSettings.h"
 
-QString ProjectStartToken    = "<project_directory>";
-QString ProjectFinishToken   = "</project_directory>";
-QString NestedStartToken     = "<nested_directory>";
-QString NestedFinishToken    = "</nested_directory>";
-QString HeaderStartToken     = "<header_subdirectory>";
-QString HeaderFinishToken    = "</header_subdirectory>";
-QString SourceStartToken     = "<source_subdirectory>";
-QString SourceFinishToken    = "</source_subdirectory>";
-QString NamespaceStartToken  = "<namespace>";
-QString NamespaceFinishToken = "</namespace>";
-QString PragmaStartToken     = "<pragma_guard>";
-QString PragmaFinishToken    = "</pragma_guard>";
-QString DefineStartToken     = "<define_guard>";
-QString DefineFinishToken    = "</define_guard>";
+QString ProjectToken_S     = "<project_directory>";
+QString ProjectToken_F    = "</project_directory>";
+QString NestedToken_S      = "<nested_directory>";
+QString NestedToken_F     = "</nested_directory>";
+QString PCHToken_S         = "<pch>";
+QString PCHToken_F        = "</pch>";
+QString PCHSubpathToken_S  = "<pch_subpath>";
+QString PCHSubpathToken_F = "</pch_subpath>";
+QString PCHNameToken_S     = "<pch_name>";
+QString PCHNameToken_F    = "</pch_name>";
+QString HeaderToken_S      = "<header_subdirectory>";
+QString HeaderToken_F     = "</header_subdirectory>";
+QString SourceToken_S      = "<source_subdirectory>";
+QString SourceToken_F     = "</source_subdirectory>";
+QString NamespaceToken_S   = "<namespace>";
+QString NamespaceToken_F  = "</namespace>";
+QString PragmaToken_S      = "<pragma_guard>";
+QString PragmaToken_F     = "</pragma_guard>";
+QString DefineToken_S      = "<define_guard>";
+QString DefineToken_F     = "</define_guard>";
 
 bool FWizardSettings::Save(Settings_T* Settings)
 {
     QByteArray Data;
 
-    Data += ProjectStartToken.toLatin1() + Settings->ProjectDirectory + ProjectFinishToken.toLatin1();
+    Data += ProjectToken_S.toLatin1() + Settings->ProjectPath + ProjectToken_F.toLatin1();
     Data += '\n';
-    Data += NestedStartToken.toLatin1() + Settings->NestedDirectory + NestedFinishToken.toLatin1();
+    Data += NestedToken_S.toLatin1() + Settings->NestedPath + NestedToken_F.toLatin1();
     Data += '\n';
-    Data += HeaderStartToken.toLatin1() + Settings->HeaderSubdirectory + HeaderFinishToken.toLatin1();
+    Data += PCHToken_S.toLatin1() + QString::number(Settings->b_PCH).toLatin1() + PCHToken_F.toLatin1();
     Data += '\n';
-    Data += SourceStartToken.toLatin1() + Settings->SourceSubdirectory + SourceFinishToken.toLatin1();
+    Data += PCHSubpathToken_S.toLatin1() + Settings->PCHSubpath + PCHSubpathToken_F.toLatin1();
     Data += '\n';
-    Data += NamespaceStartToken.toLatin1() + Settings->Namespace + NamespaceFinishToken.toLatin1();
+    Data += PCHNameToken_S.toLatin1() + Settings->PCHName + PCHNameToken_F.toLatin1();
     Data += '\n';
-    Data += PragmaStartToken.toLatin1() + QString::number(Settings->PragmaGuard).toLatin1() + PragmaFinishToken.toLatin1();
+    Data += HeaderToken_S.toLatin1() + Settings->HeaderSubpath + HeaderToken_F.toLatin1();
     Data += '\n';
-    Data += DefineStartToken.toLatin1() + QString::number(Settings->DefineGuard).toLatin1() + DefineFinishToken.toLatin1();
+    Data += SourceToken_S.toLatin1() + Settings->SourceSubpath + SourceToken_F.toLatin1();
+    Data += '\n';
+    Data += NamespaceToken_S.toLatin1() + Settings->Namespace + NamespaceToken_F.toLatin1();
+    Data += '\n';
+    Data += PragmaToken_S.toLatin1() + QString::number(Settings->b_PragmaGuard).toLatin1() + PragmaToken_F.toLatin1();
+    Data += '\n';
+    Data += DefineToken_S.toLatin1() + QString::number(Settings->b_DefineGuard).toLatin1() + DefineToken_F.toLatin1();
 
     QString SettigsDirectoryString = QDir::currentPath() + "/Settings/";
 
@@ -46,7 +58,7 @@ bool FWizardSettings::Save(Settings_T* Settings)
 
     if (SettingsFile.open(QFile::WriteOnly | QFile::Text) == false)
     {
-        (*Settings).ErrorString = QObject::tr("Cannot write file %1:\n%2").arg(SettingsFile.fileName()).arg(SettingsFile.errorString());
+        Settings->ErrorString = QObject::tr("Cannot write file %1:\n%2").arg(SettingsFile.fileName()).arg(SettingsFile.errorString());
 
         return false;
     }
@@ -72,7 +84,7 @@ EWizardFileError FWizardSettings::Load(Settings_T* Settings)
 
     if (SettingsFile.open(QFile::ReadOnly | QFile::Text) == false)
     {
-        (*Settings).ErrorString = QObject::tr("Cannot read file %1:\n%2").arg(SettingsFile.fileName()).arg(SettingsFile.errorString());
+        Settings->ErrorString = QObject::tr("Cannot read file %1:\n%2").arg(SettingsFile.fileName()).arg(SettingsFile.errorString());
 
         return WIZARD_CANT_OPEN_FILE;
     }
@@ -90,37 +102,51 @@ EWizardFileError FWizardSettings::Load(Settings_T* Settings)
 
     for (auto& String : FileContents)
     {
-        if (String.startsWith(ProjectStartToken.toStdString().c_str()) && String.endsWith(ProjectFinishToken.toStdString().c_str()))
+        if (String.startsWith(ProjectToken_S.toStdString().c_str()) && String.endsWith(ProjectToken_F.toStdString().c_str()))
         {
-            (*Settings).ProjectDirectory = String.mid(ProjectStartToken.size(), String.size() - (ProjectStartToken.size() + ProjectFinishToken.size()));
+            Settings->ProjectPath = String.mid(ProjectToken_S.size(), String.size() - (ProjectToken_S.size() + ProjectToken_F.size()));
         }
-        else if (String.startsWith(NestedStartToken.toStdString().c_str()) && String.endsWith(NestedFinishToken.toStdString().c_str()))
+        else if (String.startsWith(NestedToken_S.toStdString().c_str()) && String.endsWith(NestedToken_F.toStdString().c_str()))
         {
-            (*Settings).NestedDirectory = String.mid(NestedStartToken.size(), String.size() - (NestedStartToken.size() + NestedFinishToken.size()));
+            Settings->NestedPath = String.mid(NestedToken_S.size(), String.size() - (NestedToken_S.size() + NestedToken_F.size()));
         }
-        else if (String.startsWith(HeaderStartToken.toStdString().c_str()) && String.endsWith(HeaderFinishToken.toStdString().c_str()))
+        else if (String.startsWith(PCHToken_S.toStdString().c_str()) && String.endsWith(PCHToken_F.toStdString().c_str()))
         {
-            (*Settings).HeaderSubdirectory = String.mid(HeaderStartToken.size(), String.size() - (HeaderStartToken.size() + HeaderFinishToken.size()));
-        }
-        else if (String.startsWith(SourceStartToken.toStdString().c_str()) && String.endsWith(SourceFinishToken.toStdString().c_str()))
-        {
-            (*Settings).SourceSubdirectory = String.mid(SourceStartToken.size(), String.size() - (SourceStartToken.size() + SourceFinishToken.size()));
-        }
-        else if (String.startsWith(NamespaceStartToken.toStdString().c_str()) && String.endsWith(NamespaceFinishToken.toStdString().c_str()))
-        {
-            (*Settings).Namespace = String.mid(NamespaceStartToken.size(), String.size() - (NamespaceStartToken.size() + NamespaceFinishToken.size()));
-        }
-        else if (String.startsWith(PragmaStartToken.toStdString().c_str()) && String.endsWith(PragmaFinishToken.toStdString().c_str()))
-        {
-            QString Substring = String.mid(PragmaStartToken.size(), String.size() - (PragmaStartToken.size() + PragmaFinishToken.size()));
+            QString Substring = String.mid(PCHToken_S.size(), String.size() - (PCHToken_S.size() + PCHToken_F.size()));
 
-            (*Settings).PragmaGuard = static_cast<bool>(Substring.toInt());
+            Settings->b_PCH = static_cast<bool>(Substring.toInt());
         }
-        else if (String.startsWith(DefineStartToken.toStdString().c_str()) && String.endsWith(DefineFinishToken.toStdString().c_str()))
+        else if (String.startsWith(PCHSubpathToken_S.toStdString().c_str()) && String.endsWith(PCHSubpathToken_F.toStdString().c_str()))
         {
-            QString Substring = String.mid(DefineStartToken.size(), String.size() - (DefineStartToken.size() + DefineFinishToken.size()));
+            Settings->PCHSubpath = String.mid(PCHSubpathToken_S.size(), String.size() - (PCHSubpathToken_S.size() + PCHSubpathToken_F.size()));
+        }
+        else if (String.startsWith(PCHNameToken_S.toStdString().c_str()) && String.endsWith(PCHNameToken_F.toStdString().c_str()))
+        {
+            Settings->PCHName = String.mid(PCHNameToken_S.size(), String.size() - (PCHNameToken_S.size() + PCHNameToken_F.size()));
+        }
+        else if (String.startsWith(HeaderToken_S.toStdString().c_str()) && String.endsWith(HeaderToken_F.toStdString().c_str()))
+        {
+            Settings->HeaderSubpath = String.mid(HeaderToken_S.size(), String.size() - (HeaderToken_S.size() + HeaderToken_F.size()));
+        }
+        else if (String.startsWith(SourceToken_S.toStdString().c_str()) && String.endsWith(SourceToken_F.toStdString().c_str()))
+        {
+            Settings->SourceSubpath = String.mid(SourceToken_S.size(), String.size() - (SourceToken_S.size() + SourceToken_F.size()));
+        }
+        else if (String.startsWith(NamespaceToken_S.toStdString().c_str()) && String.endsWith(NamespaceToken_F.toStdString().c_str()))
+        {
+            Settings->Namespace = String.mid(NamespaceToken_S.size(), String.size() - (NamespaceToken_S.size() + NamespaceToken_F.size()));
+        }
+        else if (String.startsWith(PragmaToken_S.toStdString().c_str()) && String.endsWith(PragmaToken_F.toStdString().c_str()))
+        {
+            QString Substring = String.mid(PragmaToken_S.size(), String.size() - (PragmaToken_S.size() + PragmaToken_F.size()));
 
-            (*Settings).DefineGuard = static_cast<bool>(Substring.toInt());
+            Settings->b_PragmaGuard = static_cast<bool>(Substring.toInt());
+        }
+        else if (String.startsWith(DefineToken_S.toStdString().c_str()) && String.endsWith(DefineToken_F.toStdString().c_str()))
+        {
+            QString Substring = String.mid(DefineToken_S.size(), String.size() - (DefineToken_S.size() + DefineToken_F.size()));
+
+            Settings->b_DefineGuard = static_cast<bool>(Substring.toInt());
         }
     }
 

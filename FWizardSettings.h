@@ -22,14 +22,17 @@ public:
 
     struct Settings_T
     {
-        QByteArray ProjectDirectory;
-        QByteArray NestedDirectory;
-        QByteArray HeaderSubdirectory;
-        QByteArray SourceSubdirectory;
+        QByteArray ProjectPath;
+        QByteArray NestedPath;
+        bool       b_PCH;
+        QByteArray PCHSubpath;
+        QByteArray PCHName;
+        QByteArray HeaderSubpath;
+        QByteArray SourceSubpath;
         QByteArray Namespace;
         QString    ErrorString;
-        bool       PragmaGuard;
-        bool       DefineGuard;
+        bool       b_PragmaGuard;
+        bool       b_DefineGuard;
     };
 
     static bool             Save (Settings_T* Settings);
